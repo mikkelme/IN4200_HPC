@@ -1,13 +1,8 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include "header.h"
-#include "utilities.h"
-// #include "functions.h"
+#include "main.h"
 
 
 int main(int argc, char const *argv[]) {
   char *filename = "8-webpages.txt";
-
 
 
   int N, n;
@@ -18,7 +13,10 @@ int main(int argc, char const *argv[]) {
   d = 1;
   epsilon = 0.0001;
 
-  read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
+  // read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
+
+
+  test_read_graph_from_file();
 
 
   scores =  malloc((N) * sizeof(double));
@@ -26,9 +24,10 @@ int main(int argc, char const *argv[]) {
     scores[i] = 1./N;
   }
 
-
-  PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
-
+  //
+  //
+  // PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
+  //
   //
   // n = 10;
   // top_n_webpages(N, scores, n);
@@ -36,12 +35,11 @@ int main(int argc, char const *argv[]) {
   //
   // // test_read_graph_from_file();
   //
-  //
-  //
-  // free(row_ptr);
-  // free(col_idx);
-  // free(val);
-  // free(scores);
+
+  free(row_ptr);
+  free(col_idx);
+  free(val);
+  free(scores);
 
 
   return 0;
