@@ -11,12 +11,10 @@ int main(int argc, char const *argv[]) {
   double *val, *scores;
 
   d = 1;
-  epsilon = 0.0001;
+  epsilon = 1e-8;
 
-  // read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
-
-
-  test_read_graph_from_file();
+  read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
+  // print_array_int(row_ptr, N+1);
 
 
   scores =  malloc((N) * sizeof(double));
@@ -24,23 +22,19 @@ int main(int argc, char const *argv[]) {
     scores[i] = 1./N;
   }
 
-  //
-  //
-  // PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
-  //
-  //
-  // n = 10;
-  // top_n_webpages(N, scores, n);
-  // print_array_double(scores, N);
-  //
-  // // test_read_graph_from_file();
-  //
+
+
+  PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
+
+
+  n = 10;
+  top_n_webpages(N, scores, n);
+  print_array_double(scores, N);
 
   free(row_ptr);
   free(col_idx);
   free(val);
   free(scores);
-
 
   return 0;
 }

@@ -39,7 +39,6 @@ void print_array_double(double *a, int N){
 
 
 
-
 void test_read_graph_from_file(){
   /*  Test read_graph_from_file using predefined
       expected values to the web graph 8-webpages.txt */
