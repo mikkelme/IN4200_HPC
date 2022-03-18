@@ -8,10 +8,10 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   int *col_check;
   double *old_scores;
 
-
+  printf("Running page rank algorithm\n");
   // --- Indices for dangling webpages ---//
   edges = row_ptr[N];
-  col_check = malloc(N * sizeof(int)); // assign 1 for used col and 0 for empty
+  col_check = calloc(N, sizeof(int)); // assign 1 for used col and 0 for empty
   for (size_t i = 0; i < edges; i++) {
     col_check[col_idx[i]] = 1;
   }
@@ -32,7 +32,6 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
 
   // --- Iterative procedure ---//
-
   stop = 0;
   k = 0;
   old_scores = malloc((N) * sizeof(double));
@@ -61,7 +60,6 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
     // Evaluate stopping criteria
     max_diff = 0;
-    double diff;
     for (size_t i = 0; i < N; i++) {
       diff = fabs(scores[i] - old_scores[i]);
       if (diff > max_diff){
@@ -71,10 +69,16 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
 
     k += 1;
-    // printf("Iteration %zu | max_diff: %f\n", k, max_diff);
+    if (k%100 == 0){ printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff); }
+
 
     if (max_diff < epsilon){
+      printf("--> Converged after %zu iterations\n\n", k);
       stop = 1;
     }
   } // end of while-loop
+
+
+  free(col_check);
+  free(old_scores);
 } // end of function

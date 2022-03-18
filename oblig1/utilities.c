@@ -38,6 +38,29 @@ void print_array_double(double *a, int N){
 }
 
 
+void print_top_webpages(int n, int N, int *top_index, double *top_scores){
+  int rank_digits = 1 + log10(n);
+  int webpage_digits = 1 + log10(N);
+
+  printf("-----------------------------------------\n");
+  printf("           Top %02d Page Ranking           \n", n);
+  printf("-----------------------------------------\n");
+  for (size_t i = 0; i < n; i++) {
+    printf("Rank: %0*zu, Webpage no.: %0*d, Score: %f\n", rank_digits, i+1, webpage_digits, top_index[i], top_scores[i]);
+  }
+  printf("-----------------------------------------\n");
+
+}
+
+
+
+
+
+
+
+
+
+
 
 void test_read_graph_from_file(){
   /*  Test read_graph_from_file using predefined

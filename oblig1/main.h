@@ -18,6 +18,7 @@ void exchange_double(double *a0, double *a1);
 void exchange_int(int *a0, int *a1);
 void print_array_int(int *a, int N);
 void print_array_double(double *a, int N);
+void print_top_webpages(int n, int N, int *top_index, double *top_scores);
 void test_read_graph_from_file();
 
 

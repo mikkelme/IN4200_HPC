@@ -3,6 +3,9 @@
 void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, double **val){
   int edges, FromNodeId , ToNodeId;
   int *L_j, *col_counter;
+  int fortran_read_mode = *N;
+
+  printf("\nReading file: %s\n", filename);
 
   // Open file
   FILE *file = fopen(filename, "r");
@@ -33,8 +36,9 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
   // Count number of elements per row and columns
   for (size_t i = 0; i < edges; i++) {
     fscanf(file, "%d %d", &FromNodeId , &ToNodeId);
+    if (fortran_read_mode){ FromNodeId -= 1; ToNodeId -= 1;}
     (*row_ptr)[ToNodeId+1] += 1;  // count per row
-    L_j[FromNodeId ] += 1;           // count per column
+    L_j[FromNodeId ] += 1;        // count per column
 
   }
 
@@ -58,21 +62,20 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
 
   for (size_t i = 0; i < edges; i++) {
     fscanf(file, "%d %d", &FromNodeId , &ToNodeId);
+    if (fortran_read_mode){ FromNodeId -= 1; ToNodeId -= 1;}
 
     // Set values
     (*col_idx)[(*row_ptr)[ToNodeId] + col_counter[ToNodeId]] = FromNodeId ;
     (*val)[(*row_ptr)[ToNodeId] + col_counter[ToNodeId]] = (double) 1./L_j[FromNodeId ];
     col_counter[ToNodeId] += 1;
-    
-  } // end of i-loop
 
+  } // end of i-loop
 
   free(L_j);
   free(col_counter);
 
-
+  printf("--> File reading completed\n\n");
 } // end of function
-
 
 
 
