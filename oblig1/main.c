@@ -8,15 +8,15 @@ int main(int argc, char const *argv[]) {
   double *val, *scores;
   char *filename;
 
-  d = 1;
-  epsilon = 1e-6;
+  d = 0.98;
+  epsilon = 1e-12;
 
 
   // filename = "8-webpages.txt";
-  filename = "100nodes_graphs.txt";
-  // filename = "web-stanford.txt";
+  // filename = "100nodes_graphs.txt";
+  filename = "web-stanford.txt";
 
-  fortran_read_mode = 0;
+  fortran_read_mode = 1;
   if (fortran_read_mode){ N = 1; }
   else { N = 0; }
 

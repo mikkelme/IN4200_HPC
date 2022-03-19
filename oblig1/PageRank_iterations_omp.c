@@ -2,8 +2,6 @@
 #include <omp.h>
 
 
-// PageRank change for 100nodes - check that
-
 
 void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double d, double epsilon, double *scores){
   int edges, stop, num_dangling, non_dangling;
@@ -12,15 +10,18 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   int *col_check, *dangling_idx;
   double *old_scores;
 
-  printf("Running page rank algorithm\n");
-  // --- Indices for dangling webpages ---//
-  edges = row_ptr[N];
-  col_check = calloc(N, sizeof(int)); // assign 1 for used col and 0 for empty
-  non_dangling = 0;
-
 
   #pragma omp parallel
   {
+
+    #pragma omp single
+    {
+      printf("Running page rank algorithm (num threads: %d)\n", omp_get_num_threads());
+      // --- Indices for dangling webpages ---//
+      edges = row_ptr[N];
+      col_check = calloc(N, sizeof(int)); // assign 1 for used col and 0 for empty
+      non_dangling = 0;
+    }
 
     #pragma omp for
     for (size_t i = 0; i < edges; i++) {
@@ -48,7 +49,6 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
 
 
-
     // --- Iterative procedure ---//
     #pragma omp single
     {
@@ -70,7 +70,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
 
       // Calculate W
-      #pragma omp for reduction(+ : W) nowait
+      #pragma omp for reduction(+ : W)
       for (size_t i = 0; i < num_dangling; i++) {
         W += scores[dangling_idx[i]];
       }
