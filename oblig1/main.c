@@ -40,7 +40,9 @@ int main(int argc, char *argv[]) {
   }
 
 
+
   PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
+
 
   top_n_webpages(N, scores, n);
 

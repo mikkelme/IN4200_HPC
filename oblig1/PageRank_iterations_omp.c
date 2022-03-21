@@ -8,7 +8,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   size_t j, k;
   double W, iter_factor, dotp, max_diff, diff, last_diff;
   int *col_check, *dangling_idx;
-  double *old_scores;
+  double *old_scores, *tmp;
   double start, end;
 
 
@@ -57,6 +57,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
       stop = 0;
       k = 0;
       old_scores = malloc((N) * sizeof(double));
+      memcpy(old_scores, scores, N*sizeof(double));
       last_diff = 1e6;
 
     }
@@ -68,9 +69,9 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
       { W = 0;  max_diff = 0; }
 
 
-      // Copy scores to old_scores
-      #pragma omp single
-      { memcpy(old_scores, scores, N*sizeof(double)); }
+      #pragma single
+      { memcpy(old_scores, scores, N*sizeof(double));}
+
 
 
       // Calculate W
@@ -106,8 +107,14 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
       #pragma omp single
       {
         k += 1;
+        // // pointer swap
+        // tmp = scores;
+        // scores = old_scores;
+        // old_scores = tmp;
+
         if (k%100 == 0){
           printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff);
+          printf("%.12f\n", last_diff-max_diff);
           if (last_diff - max_diff < epsilon) {
             printf("--> Algorithm didn't converge\n");
             exit(1);
@@ -118,14 +125,21 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
         if (max_diff < epsilon){
           end = omp_get_wtime();
           printf("--> Converged after %zu iterations (time used: %g s)\n\n", k, (double) (end-start));
-
           stop = 1;
         }
       }
 
     } // end of while-loop
 
+
   } // end of parallel region
+
+  // if (k%2 == 1){
+  //   // pointer swap
+  //   tmp = scores;
+  //   scores = old_scores;
+  //   old_scores = tmp;
+  // }
 
 
   free(col_check);

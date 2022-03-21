@@ -6,7 +6,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   size_t k;
   double W, iter_factor, dotp, max_diff, diff, last_diff;
   int *col_check;
-  double *old_scores;
+  double *old_scores, *tmp;
   time_t start, end;
 
   printf("Running page rank algorithm\n");
@@ -38,11 +38,11 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   stop = 0;
   k = 0;
   old_scores = malloc((N) * sizeof(double));
+  memcpy(old_scores, scores, N*sizeof(double));
+
   last_diff = 1e6;
 
   while (stop == 0){
-    // Copy scores to old_scores
-    memcpy(old_scores, scores, N*sizeof(double));
 
     // Calculate W
     W = 0;
@@ -72,6 +72,12 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
     }
 
 
+    // pointer swap
+    tmp = scores;
+    scores = old_scores;
+    old_scores = tmp;
+
+
     k += 1;
     if (k%100 == 0){
       printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff);
@@ -87,10 +93,22 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
       end = clock();
       printf("--> Converged after %zu iterations (time used: %g s)\n\n", k, (double) (end-start)/CLOCKS_PER_SEC);
       stop = 1;
+
     }
+
+
+
   } // end of while-loop
+
+  if (k%2 == 1){
+    // pointer swap
+    tmp = scores;
+    scores = old_scores;
+    old_scores = tmp;
+  }
 
 
   free(col_check);
   free(old_scores);
+  
 } // end of function
