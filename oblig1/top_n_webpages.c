@@ -6,6 +6,11 @@ void top_n_webpages(int N, double *scores, int n){
   size_t top_idx;
   int *top_index;
   double *top_scores;
+  time_t start, end;
+
+
+  printf("Sorting for top %d webpages\n", n);
+  start = clock();
 
   // In case of to high n
   if (n > N){
@@ -43,7 +48,9 @@ void top_n_webpages(int N, double *scores, int n){
 
 
  // Print top n-webpages
+ end = clock();
  print_top_webpages(n, N, top_index, top_scores);
+ printf("--> (time used: %g s)\n\n", (double) (end-start)/CLOCKS_PER_SEC);
 
 
 } // end of function

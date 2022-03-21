@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 // Fundamental functions
 void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, double **val);

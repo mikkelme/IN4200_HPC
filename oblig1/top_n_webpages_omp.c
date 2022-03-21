@@ -7,6 +7,10 @@ void top_n_webpages(int N, double *scores, int n){
   int count_exchange;
   int *index, *top_index, *index_th, *top_index_th;
   double *top_scores, *top_scores_th;
+  double start, end;
+
+
+  start = omp_get_wtime();
 
   // In case of to high n
   if (n > N){
@@ -18,6 +22,10 @@ void top_n_webpages(int N, double *scores, int n){
 
   #pragma omp parallel private(top_index_th, top_scores_th)
   {
+
+    #pragma omp single
+    { printf("Sorting for top %d webpages (num threads: %d)\n", n, omp_get_num_threads()); }
+
     top_index_th = calloc(n, sizeof(int));
     top_scores_th = calloc(n, sizeof(double));
     #pragma omp for
@@ -37,7 +45,10 @@ void top_n_webpages(int N, double *scores, int n){
 } // end of parallel region
 
   // Print top n-webpages
+  end = omp_get_wtime();
   print_top_webpages(n, N, top_index, top_scores);
+  printf("--> (time used: %g s)\n\n", (double) (end-start));
+
 
 
  } // end of function

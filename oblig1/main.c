@@ -1,24 +1,35 @@
 #include "main.h"
 
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
   int N, n, fortran_read_mode;
   double d, epsilon;
   int *row_ptr, *col_idx;
   double *val, *scores;
   char *filename;
 
-  d = 0.98;
-  epsilon = 1e-12;
-
-
+  // d = 0.98;
+  // epsilon = 1e-5;
   // filename = "8-webpages.txt";
   // filename = "100nodes_graphs.txt";
-  filename = "web-stanford.txt";
+  // filename = "web-stanford.txt";
 
-  fortran_read_mode = 1;
-  if (fortran_read_mode){ N = 1; }
-  else { N = 0; }
+
+  if (argc < 5){
+    printf("Please provide arguments: d, epsilon, n, filename, (read mode) in the command line.\n");
+    exit(1);
+  }
+
+  d = atof(argv[1]);
+  epsilon = atof(argv[2]);
+  n = atoi(argv[3]);
+  filename = argv[4];
+
+
+  if (argc == 6){ fortran_read_mode = atoi(argv[5]); }
+  else          { fortran_read_mode = 0; }
+  N = fortran_read_mode;
+
 
   read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
 
@@ -31,7 +42,6 @@ int main(int argc, char const *argv[]) {
 
   PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
 
-  n = 10;
   top_n_webpages(N, scores, n);
 
   free(row_ptr);

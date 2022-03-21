@@ -4,8 +4,11 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
   int edges, FromNodeId , ToNodeId;
   int *L_j, *col_counter;
   int fortran_read_mode = *N;
+  time_t start, end;
+
 
   printf("\nReading file: %s\n", filename);
+  start = clock();
 
   // Open file
   FILE *file = fopen(filename, "r");
@@ -71,10 +74,12 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
 
   } // end of i-loop
 
+
+  end = clock();
+  printf("--> File reading completed (time used: %g s)\n\n", (double) (end-start)/CLOCKS_PER_SEC);
+
   free(L_j);
   free(col_counter);
-
-  printf("--> File reading completed\n\n");
 } // end of function
 
 

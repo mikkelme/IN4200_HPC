@@ -8,7 +8,7 @@ OBJ = main.o read_graph_from_file.o PageRank_iterations.o top_n_webpages.o utili
 
 
 
-serial: main clean run
+serial: main clean
 
 # %.o: %.c $(DEPS)
 # 		$(CC) -c -o $@ $< $(CFLAGS)
@@ -16,8 +16,6 @@ serial: main clean run
 main: $(OBJ)
 	$(CC) -o $@.out $^ $(CFLAGS)
 
-run:
-	 	./main.out
 
 
 # Compile the parallel code
@@ -26,7 +24,7 @@ CC_OMP = gcc -Xpreprocessor -fopenmp
 CFLAGS_OMP = -lomp
 CFLAGS_OMP = -lomp
 
-omp: main_omp run_omp clean
+omp: main_omp clean
 
 # %.o: %.c $(DEPS)
 # 		$(CC_OMP) -c -o $@ $< $(CFLAGS)
@@ -60,23 +58,6 @@ run_omp:
 clean:
 	rm -f *.o *~
 
-
-
-#
-# main.o: main.c $(DEPS)
-# 		gcc -c -o main.o main.c
-#
-# read_graph_from_file.o: read_graph_from_file.c $(DEPS)
-# 		gcc -c -o read_graph_from_file.o read_graph_from_file.c
-#
-# PageRank_iterations_omp.o: PageRank_iterations_omp.c $(DEPS)
-# 		$(CC_OMP) -c -o PageRank_iterations_omp.o PageRank_iterations_omp.c
-#
-# top_n_webpages_omp.o: top_n_webpages_omp.c $(DEPS)
-# 		$(CC_OMP) -c -o top_n_webpages_omp.o top_n_webpages_omp.c
-#
-# utilities.o: utilities.c $(DEPS)
-# 		gcc -c -o utilities.o utilities.c
 
 
 

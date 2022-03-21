@@ -4,11 +4,14 @@
 void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double d, double epsilon, double *scores){
   int edges, stop;
   size_t k;
-  double W, iter_factor, dotp, max_diff, diff;
+  double W, iter_factor, dotp, max_diff, diff, last_diff;
   int *col_check;
   double *old_scores;
+  time_t start, end;
 
   printf("Running page rank algorithm\n");
+  start = clock();
+
   // --- Indices for dangling webpages ---//
   edges = row_ptr[N];
   col_check = calloc(N, sizeof(int)); // assign 1 for used col and 0 for empty
@@ -35,6 +38,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   stop = 0;
   k = 0;
   old_scores = malloc((N) * sizeof(double));
+  last_diff = 1e6;
 
   while (stop == 0){
     // Copy scores to old_scores
@@ -69,11 +73,19 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
 
     k += 1;
-    if (k%100 == 0){ printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff); }
+    if (k%100 == 0){
+      printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff);
+      if (last_diff - max_diff < 1e-10) {
+        printf("--> Algorithm didn't converge\n");
+        exit(1);
+      }
+      last_diff = max_diff;
+    }
 
 
     if (max_diff < epsilon){
-      printf("--> Converged after %zu iterations\n\n", k);
+      end = clock();
+      printf("--> Converged after %zu iterations (time used: %g s)\n\n", k, (double) (end-start)/CLOCKS_PER_SEC);
       stop = 1;
     }
   } // end of while-loop
