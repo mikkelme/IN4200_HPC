@@ -35,9 +35,6 @@ void top_n_webpages(int N, double *scores, int n){
 
     #pragma omp critical
     {
-      // int thread_id = omp_get_thread_num();
-      // printf("Thread: %d\n", thread_id);
-      // print_array_double(top_scores_th, n);
       for (size_t i = 0; i < n; i++) {
         check_score_top(n, i, top_scores_th[i], top_index_th[i], top_scores, top_index);
       }

@@ -75,7 +75,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
     k += 1;
     if (k%100 == 0){
       printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff);
-      if (last_diff - max_diff < 1e-10) {
+      if (last_diff - max_diff < epsilon) {
         printf("--> Algorithm didn't converge\n");
         exit(1);
       }
