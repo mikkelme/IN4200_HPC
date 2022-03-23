@@ -10,13 +10,14 @@ void top_n_webpages(int N, double *scores, int n){
 
 
   printf("Sorting for top %d webpages\n", n);
-  start = clock();
+  start = clock(); // start of timing
 
   // In case of to high n
   if (n > N){
     n = N;
   }
 
+  // Find top n scores and coresponding indexes
   top_scores = calloc(n, sizeof(double));
   top_index = calloc(n, sizeof(double));
 
@@ -33,7 +34,7 @@ void top_n_webpages(int N, double *scores, int n){
         }
       } // end of j-loop
 
-      // move over
+      // move over current top scores and indexes
       for (size_t k = n-1; k > top_idx; k--) {
         top_scores[k] = top_scores[k-1];
         top_index[k] = top_index[k-1];
@@ -43,12 +44,10 @@ void top_n_webpages(int N, double *scores, int n){
       top_scores[top_idx] = scores[i];
       top_index[top_idx] = i;
     } // end of if
-
-  }
-
+  } // end of i-loop
 
  // Print top n-webpages
- end = clock();
+ end = clock(); // end of timing
  print_top_webpages(n, N, top_index, top_scores);
  printf("--> (time used: %g s)\n\n", (double) (end-start)/CLOCKS_PER_SEC);
 

@@ -10,22 +10,23 @@ void top_n_webpages(int N, double *scores, int n){
   double start, end;
 
 
-  start = omp_get_wtime();
+  start = omp_get_wtime(); // start of timing
 
   // In case of to high n
   if (n > N){
     n = N;
   }
 
+  // Find top n scores and coresponding indexes
   top_scores = calloc(n, sizeof(double));
   top_index = calloc(n, sizeof(double));
 
   #pragma omp parallel private(top_index_th, top_scores_th)
   {
-
     #pragma omp single
     { printf("Sorting for top %d webpages (num threads: %d)\n", n, omp_get_num_threads()); }
 
+    // Find top scores and indexes for smaller blocks in parallel
     top_index_th = calloc(n, sizeof(int));
     top_scores_th = calloc(n, sizeof(double));
     #pragma omp for
@@ -33,6 +34,7 @@ void top_n_webpages(int N, double *scores, int n){
       check_score_top(n, i, scores[i], i, top_scores_th, top_index_th);
     }
 
+    // Combine resuults for each thread
     #pragma omp critical
     {
       for (size_t i = 0; i < n; i++) {
@@ -42,19 +44,20 @@ void top_n_webpages(int N, double *scores, int n){
 } // end of parallel region
 
   // Print top n-webpages
-  end = omp_get_wtime();
+  end = omp_get_wtime(); // end of timing
   print_top_webpages(n, N, top_index, top_scores);
   printf("--> (time used: %g s)\n\n", (double) (end-start));
-
-
 
  } // end of function
 
 
 
 void check_score_top(int n, size_t i, double score, int index, double *top_array, int *top_index){
-  size_t top_idx;
+  /* Check whether score is among the top n of top_array
+      and place its score and index in top_array and
+      top_index if valid  */
 
+  size_t top_idx;
   if (score > top_array[n-1])
   {
     top_idx = 0;
@@ -66,7 +69,7 @@ void check_score_top(int n, size_t i, double score, int index, double *top_array
       }
     } // end of j-loop
 
-    // move over
+    // move over current top scores and indexes
     for (size_t k = n-1; k > top_idx; k--) {
       top_array[k] = top_array[k-1];
       top_index[k] = top_index[k-1];

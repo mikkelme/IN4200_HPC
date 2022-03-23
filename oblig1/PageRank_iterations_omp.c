@@ -12,7 +12,7 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
   double start, end;
 
 
-  start = omp_get_wtime();
+  start = omp_get_wtime(); // start of timing
   #pragma omp parallel
   {
 
@@ -59,27 +59,18 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
       old_scores = malloc((N) * sizeof(double));
       memcpy(old_scores, scores, N*sizeof(double));
       last_diff = 1e6;
-
     }
-
 
     while (stop == 0){
       // reset variables
       #pragma single
       { W = 0;  max_diff = 0; }
 
-
-      #pragma single
-      { memcpy(old_scores, scores, N*sizeof(double));}
-
-
-
       // Calculate W
       #pragma omp for reduction(+ : W)
       for (size_t i = 0; i < num_dangling; i++) {
-        W += scores[dangling_idx[i]];
+        W += old_scores[dangling_idx[i]];
       }
-
 
       // Calculate scores
       #pragma omp single
@@ -94,7 +85,6 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
         scores[i] = iter_factor + d*dotp;
       }
 
-
       // Evaluate stopping criteria
       #pragma omp parallel for private(diff) reduction(max : max_diff)
       for (size_t i = 0; i < N; i++) {
@@ -106,42 +96,49 @@ void PageRank_iterations(int N, int *row_ptr, int *col_idx, double *val, double 
 
       #pragma omp single
       {
-        k += 1;
-        // // pointer swap
-        // tmp = scores;
-        // scores = old_scores;
-        // old_scores = tmp;
+        // pointer swap
+        tmp = scores;
+        scores = old_scores;
+        old_scores = tmp;
 
+        // Prints, and stop and converge check
+        k += 1;
         if (k%100 == 0){
           printf("Iteration %5zu | max_diff: %.3g\n", k, max_diff);
-          printf("%.12f\n", last_diff-max_diff);
-          if (last_diff - max_diff < epsilon) {
+          // printf("%.12f\n", last_diff-max_diff);
+          if (last_diff - max_diff < epsilon) { // converge check
             printf("--> Algorithm didn't converge\n");
             exit(1);
           }
           last_diff = max_diff;
         }
 
-        if (max_diff < epsilon){
-          end = omp_get_wtime();
+        if (max_diff < epsilon){ // stop check
+          end = omp_get_wtime(); // end of timing
           printf("--> Converged after %zu iterations (time used: %g s)\n\n", k, (double) (end-start));
           stop = 1;
         }
-      }
-
+      } // end of single
     } // end of while-loop
 
 
   } // end of parallel region
 
-  // if (k%2 == 1){
-  //   // pointer swap
-  //   tmp = scores;
-  //   scores = old_scores;
-  //   old_scores = tmp;
-  // }
+  if (k%2 == 1){
+    // pointer swap back in case of
+    // odd number of iterations
+    tmp = scores;
+    scores = old_scores;
+    old_scores = tmp;
+  }
+  else {
+    // memory copy of old_scores to socre
+    // in case of even number of iterations
+    memcpy(scores, old_scores, N*sizeof(double));
+  }
 
-
+  // free memory
   free(col_check);
   free(old_scores);
+
 } // end of function

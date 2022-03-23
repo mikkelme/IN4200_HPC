@@ -8,13 +8,8 @@ int main(int argc, char *argv[]) {
   double *val, *scores;
   char *filename;
 
-  // d = 0.98;
-  // epsilon = 1e-5;
-  // filename = "8-webpages.txt";
-  // filename = "100nodes_graphs.txt";
-  // filename = "web-stanford.txt";
 
-
+  // Read input variables from command line
   if (argc < 5){
     printf("Please provide arguments: d, epsilon, n, filename, (read mode) in the command line.\n");
     exit(1);
@@ -25,27 +20,26 @@ int main(int argc, char *argv[]) {
   n = atoi(argv[3]);
   filename = argv[4];
 
-
   if (argc == 6){ fortran_read_mode = atoi(argv[5]); }
   else          { fortran_read_mode = 0; }
   N = fortran_read_mode;
 
-
+  // Read graph
   read_graph_from_file(filename, &N, &row_ptr, &col_idx, &val);
 
-
+  // Intialize scores and run pagerank algorithm
   scores =  malloc((N) * sizeof(double));
   for (size_t i = 0; i < N; i++) {
     scores[i] = (double) 1./N;
   }
-
-
-
   PageRank_iterations(N, row_ptr, col_idx, val, d, epsilon, scores);
 
 
+  // Show top n webpages
   top_n_webpages(N, scores, n);
 
+
+  // Free memory 
   free(row_ptr);
   free(col_idx);
   free(val);

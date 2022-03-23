@@ -8,7 +8,7 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
 
 
   printf("\nReading file: %s\n", filename);
-  start = clock();
+  start = clock(); // start of timing
 
   // Open file
   FILE *file = fopen(filename, "r");
@@ -28,13 +28,11 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
   // Skip first two lines (comments)
   for (size_t i = 0; i < 2; i++){fgets(buffer, MAX_LENGTH, file);}
 
-  // Get Nodes and Edges
-  fscanf(file, "%*s %*s %d %*s %d %*[^\n]\n", N, &edges); // and skip next line
-
+  // Get Nodes and Edges (and skip next line)
+  fscanf(file, "%*s %*s %d %*s %d %*[^\n]\n", N, &edges);
 
   L_j =  calloc(*N, sizeof(L_j)); // for counting number of values per column
   *row_ptr = calloc(*N+1, sizeof(int));
-
 
   // Count number of elements per row and columns
   for (size_t i = 0; i < edges; i++) {
@@ -42,7 +40,6 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
     if (fortran_read_mode){ FromNodeId -= 1; ToNodeId -= 1;}
     (*row_ptr)[ToNodeId+1] += 1;  // count per row
     L_j[FromNodeId ] += 1;        // count per column
-
   }
 
   // Fill in row_ptr (cumulative sum)
@@ -51,18 +48,18 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
   }
 
 
-  //--- Second read ---//
+  //--- Second read through ---//
   /* fill val and col_idx */
-  rewind(file);
+
+  rewind(file); // go back to top of file
   *col_idx = malloc((edges) * sizeof(int));
   *val = malloc((edges) * sizeof(double));
   col_counter = calloc(edges, sizeof(col_counter));
 
-  for (size_t i = 0; i < edges; i++) {(*col_idx)[i] = *N;} // fill col_idx with high number
-
   // Skip first four coment lines
   for (size_t i = 0; i < 4; i++){fgets(buffer, MAX_LENGTH, file);}
 
+  // Get col_idx and val
   for (size_t i = 0; i < edges; i++) {
     fscanf(file, "%d %d", &FromNodeId , &ToNodeId);
     if (fortran_read_mode){ FromNodeId -= 1; ToNodeId -= 1;}
@@ -75,34 +72,12 @@ void read_graph_from_file(char *filename, int *N, int **row_ptr, int **col_idx, 
   } // end of i-loop
 
 
-  end = clock();
+  end = clock(); // end of timing
   printf("--> File reading completed (time used: %g s)\n\n", (double) (end-start)/CLOCKS_PER_SEC);
 
+
+  // free memory
   free(L_j);
   free(col_counter);
+  
 } // end of function
-
-
-
-
-// old loop (sorting each column in col_idx)
-
-// for (size_t i = 0; i < edges; i++) {
-//   fscanf(file, "%d %d", &FromNodeId , &ToNodeId);
-//
-//   for (size_t j = 0; j < (*row_ptr)[ToNodeId+1]-(*row_ptr)[ToNodeId]; j++) {
-//     if (FromNodeId  < (*col_idx)[(*row_ptr)[ToNodeId] + j]){
-//       for (size_t k = col_counter[ToNodeId]; k > j ; k--)
-//       { // Move values to the right
-//         (*col_idx)[(*row_ptr)[ToNodeId] + k] = (*col_idx)[(*row_ptr)[ToNodeId] + k-1];
-//         (*val)[(*row_ptr)[ToNodeId] + k] = (*val)[(*row_ptr)[ToNodeId] + k-1];
-//       } // end of k-loop
-//
-//       (*col_idx)[(*row_ptr)[ToNodeId] + j] = FromNodeId ;
-//       (*val)[(*row_ptr)[ToNodeId] + j] = 1./L_j[FromNodeId ];
-//       col_counter[ToNodeId] += 1;
-//       break;
-//
-//     } // end of if
-//   } // end of j-loop
-// } // end of i-loop
