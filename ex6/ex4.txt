@@ -1,0 +1,3 @@
+mesh = M x N
+checkerboard = S x T
+Just insert S x T as many times as possible...
