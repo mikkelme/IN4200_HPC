@@ -1,9 +1,0 @@
-There are n equal-sized independent tasks and p equal workers.
-Suppose n is not divisible by p. How to divide the n tasks among
-the p workers in a fair way?
-
-
-If they cannot cooperate each worker get
-n // p task each where the rest n%p get disributed
-to only some of the workers. If they can cooperate
-the rest should be distributed accros all the workers.
