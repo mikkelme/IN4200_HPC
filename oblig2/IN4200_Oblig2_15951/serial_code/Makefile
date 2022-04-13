@@ -31,4 +31,4 @@ clean:
 	$(MAKE) obj-clean
 	$(MAKE) exec-clean
 	$(MAKE) autosave-clean
-	$(MAKE) -C ../simple-jpeg clean
+	$(MAKE) -C ../../one_folder/simple-jpeg clean
