@@ -1,11 +1,9 @@
 CC = gcc
 CFLAGS = -O2
-LDFLAGS = -L../../one_folder/simple-jpeg/ -lsimplejpeg
+LDFLAGS = -L../simple-jpeg/ -lsimplejpeg
 
 PROJ = serial_main
-OBJS = serial_main.o functions.o
-
-# all: simple-jpeg $(PROJ) obj-clean run
+OBJS = serial_main.o ../utilities/functions.o
 
 
 all: simple-jpeg $(PROJ) $(OBJS) obj-clean run
@@ -14,9 +12,6 @@ all: simple-jpeg $(PROJ) $(OBJS) obj-clean run
 serial_main: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@.out $(LDFLAGS)
 
-
-# serial_main: $(OBJS)
-# 	$(CC) $(CFLAGS) $< -o $@.out $(LDFLAGS)
 
 
 serial_main.o: serial_main.c
@@ -27,10 +22,8 @@ functions.o: functions.c functions.h
 	$(CC) $(CFLAGS) -c functions.c
 
 
-
-
 simple-jpeg:
-	$(MAKE) -C ../../one_folder/simple-jpeg
+	$(MAKE) -C ../simple-jpeg
 
 
 run:
