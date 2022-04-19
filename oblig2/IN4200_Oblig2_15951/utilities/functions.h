@@ -6,8 +6,6 @@
 #include<string.h>
 #include <time.h>
 
-#include <mpi.h>
-
 void import_JPEG_file(const char *filename, unsigned char **image_chars,
                       int *image_height, int *image_width,
                       int *num_components);

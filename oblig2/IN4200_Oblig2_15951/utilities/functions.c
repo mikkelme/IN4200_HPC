@@ -98,6 +98,10 @@ void iso_diffusion_denoising(image *u, image *u_bar, float kappa, int iters)
      printf("--> complete (time used = %g s)\n\n", (double)(end - start) / CLOCKS_PER_SEC);
 }
 
+
+
+
+
 void output_name(char *input_jpeg_filename, char **output_jpeg_filename, char *out_extension, int iters)
 {
     /*  Produce outputname on the format:

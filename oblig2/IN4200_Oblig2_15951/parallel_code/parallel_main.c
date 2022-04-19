@@ -5,8 +5,8 @@
 #include <malloc.h>
 #endif
 
-// #include "functions.h"
 #include "../utilities/functions.h"
+#include "../utilities/functions_parallel.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     name */
 
     // temporary hardcoded inputs
-    kappa = 0.2;
-    iters = 10;
+    kappa = 0.2 ;
+    iters = 100;
     input_jpeg_filename = "mona_lisa_noisy.jpg";
     out_extension = "_denoised";
     output_name(input_jpeg_filename, &output_jpeg_filename, out_extension, iters);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     my_m = m / (int)num_procs + (my_rank < m % num_procs);
     my_n = n;
     int my_prod = my_m*my_n;
-    my_image_chars = malloc(10 * sizeof(unsigned char));
+    my_image_chars = malloc(my_prod * sizeof(unsigned char));
 
     allocate_image(&u, my_m, my_n);
     allocate_image(&u_bar, my_m, my_n);
@@ -66,96 +66,103 @@ int main(int argc, char *argv[])
     MPI_Status status;
 
     if (my_rank == 0){
-        int tmp_m = m / (int)num_procs + (1 < m % num_procs);
-        int tmp_n = n;
-        int tmp_prod = tmp_m*tmp_n;
 
-        printf("%d\n", tmp_prod);
-        for (size_t i = 0; i < 10; i++)
+
+        for (size_t i = 0; i < my_prod; i++)
         {
-            printf("%d\n", image_chars[i]);
-        }
-
-        MPI_Send(&image_chars[0],
-                10,
-                MPI_UNSIGNED_CHAR, 1, 0,
-                MPI_COMM_WORLD);
-    }
-    
-    if (my_rank == 1){
-        // recieve
-        printf("%d\n", my_prod);
-        MPI_Recv(my_image_chars, 10, MPI_UNSIGNED_CHAR, 0, 0,
-                 MPI_COMM_WORLD, &status);
-
-        for (size_t i = 0; i < 10; i++)
-        {
-            printf("%d\n", my_image_chars[i]);
+            my_image_chars[i] = image_chars[i];
         }
         
+
+
+        int start_index = my_m*my_n;
+       
+        for (size_t i = 1; i < num_procs; i++)
+        {
+            int tmp_m = m / (int)num_procs + (i < m % num_procs);
+            int tmp_n = n;
+            int tmp_prod = tmp_m * tmp_n;
+            
+
+            MPI_Send(&image_chars[start_index],
+                        tmp_prod,
+                        MPI_UNSIGNED_CHAR, i, 0,
+                        MPI_COMM_WORLD);
+            // printf("Send to thread %zu\n", i);
+            // printf("%d\n", image_chars[start_index]);
+
+            start_index += tmp_prod;
+                
+        }
+       
+
+    }
+    else {
+        MPI_Recv(my_image_chars, my_prod, MPI_UNSIGNED_CHAR, 0, 0,
+                 MPI_COMM_WORLD, &status);
+        // printf("Recieved from thread %d\n", my_rank);
+        // printf("%d\n", my_image_chars[0]);
     }
 
-    // printf("%c\n", my_image_chars[0]);
 
-    /////////////////////////
+    convert_jpeg_to_image(my_image_chars, &u);
+    iso_diffusion_denoising_parallel(&u, &u_bar, kappa, iters);
 
-        // if (my_rank == 0){
-        //     for (size_t i = 1; i < num_procs - 1; i++)
-        //     {
-        //         int prod = (m / (int)num_procs + (my_rank < m % num_procs))*n;
-        //         int index = prod; // I think this is start index
-        //         // index = i * elements_per_process;
 
-        //         MPI_Send(&image_chars[index],
-        //                  prod,
-        //                  MPI_UNSIGNED_CHAR, i, 0,
-        //                  MPI_COMM_WORLD);
-        //     }
-        // }
-        // else {
+    /* each process sends its resulting content of u_bar to process 0 */
+    /* process 0 receives from each process incoming values and */
+    /* copy them into the designated region of struct whole_image */
+    /*  ...  */
 
-        //     MPI_Recv(&my_image_chars, my_prod, MPI_UNSIGNED_CHAR, 0, 0,
-        //          MPI_COMM_WORLD, &status);
+    if (my_rank == 0)
+    {
 
-        // }
+        for (size_t i = 0; i < my_m; i++)
+        {
+            for (size_t j = 0; j < my_n; j++)
+            {
+                whole_image.image_data[i][j] = u_bar.image_data[i][j];
+            }
+            
+        }
+        
+        int start_row = my_m;
 
-        // printf("Rank %d, %d, %d, prod: %d\n", my_rank, my_m, my_n, my_m*my_n);
+        for (size_t i = 1; i < num_procs; i++)
+        {
+            int tmp_m = m / (int)num_procs + (i < m % num_procs);
+            int tmp_n = n;
+            int tmp_prod = tmp_m * tmp_n;
 
-        // int counts[4] = {3041955, 3039120, 3039120, 3039120}; /* how many pieces of data everyone has */
-        // int mynum = counts[my_rank];
-        // int displs[4] = {0, 3041955, 6081075, 9120195}; /* the starting point of everyone's data */
-        //                                                 /* in the global array */
+            MPI_Recv(&whole_image.image_data[start_row][0],
+                     tmp_prod,
+                     MPI_FLOAT, i, 0,
+                     MPI_COMM_WORLD, &status);
+            // printf("Recieved from thread %zu\n", i);
+            start_row += tmp_m;
+        }
+    }
+    else
+    {
+        MPI_Send(&u_bar.image_data[0][0], my_prod, MPI_FLOAT, 0, 0,
+                 MPI_COMM_WORLD);
+        // printf("Send to thread %d\n", my_rank);
+    }
 
-        // MPI_Scatterv(image_chars, counts, displs, /* proc i gets counts[i] pts from displs[i] */
-        //              MPI_UNSIGNED_CHAR,
-        //              my_image_chars, mynum, MPI_UNSIGNED_CHAR, /* I'm receiving mynum MPI_INTs into local */
-        //              0, MPI_COMM_WORLD);
 
-        // if (rank == 0){
-        //     for (size_t i = 0; i < counts[my_rank]; i++)
-        //     {
-        //         my_image_chars[i] = (char) 0;
-        //     }
 
-        // }
+    if (my_rank == 0)
+    {
+        convert_image_to_jpeg(&whole_image, image_chars);
+        export_JPEG_file(output_jpeg_filename, image_chars, m, n, c, 75);
+        deallocate_image(&whole_image);
 
-        // convert_jpeg_to_image(my_image_chars, &u);
+    }
+    
+    deallocate_image(&u);
+    deallocate_image(&u_bar);
+    MPI_Finalize();
 
-        // iso_diffusion_denoising_parallel(&u, &u_bar, kappa, iters);
-        // /* each process sends its resulting content of u_bar to process 0 */
-        // /* process 0 receives from each process incoming values and */
-        // /* copy them into the designated region of struct whole_image */
-        // /*  ...  */
-        // if (my_rank == 0)
-        // {
-        //     convert_image_to_jpeg(&whole_image, image_chars);
-        //     export_JPEG_file(output_jpeg_filename, image_chars, m, n, c, 75);
-        //     deallocate_image(&whole_image);
-        //         4
-        //     }
-        //     deallocate_image(&u);
-        //     deallocate_image(&u_bar);
-        MPI_Finalize();
-
-        return 0;
+    return 0;
 }
+
