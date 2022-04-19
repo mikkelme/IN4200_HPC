@@ -1,4 +1,4 @@
-CC = mpicc#gcc
+CC = mpicc #gcc
 CFLAGS = -O2
 LDFLAGS = -L../simple-jpeg/ -lsimplejpeg
 
@@ -14,17 +14,6 @@ parallel_main: $(OBJS)
 
 
 
-parallel_main.o: parallel_main.c
-	$(CC) $(CFLAGS) -c parallel_main.c
-
-
-functions.o: functions.c functions.h
-	$(CC) $(CFLAGS) -c functions.c
-
-functions_parallel.o: functions_parallel.c functions_parallel.h
-	$(CC) $(CFLAGS) -c functions_parallel.c
-
-
 simple-jpeg:
 	$(MAKE) -C ../simple-jpeg
 
@@ -34,9 +23,10 @@ run:
 
 obj-clean:
 	$(RM) *.o
+	$(RM) ../utilities/*.o
 
 exec-clean:
-	$(RM) $(PROJ)
+	$(RM) *.out
 
 autosave-clean:
 	$(RM) *~
@@ -45,4 +35,4 @@ clean:
 	$(MAKE) obj-clean
 	$(MAKE) exec-clean
 	$(MAKE) autosave-clean
-	$(MAKE) -C ../../one_folder/simple-jpeg clean
+	$(MAKE) -C ../simple-jpeg clean

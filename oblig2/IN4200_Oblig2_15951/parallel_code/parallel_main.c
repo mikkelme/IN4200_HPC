@@ -20,13 +20,14 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+    MPI_Status status;
 
     /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_file
     name */
 
     // temporary hardcoded inputs
     kappa = 0.2 ;
-    iters = 100;
+    iters = 10000;
     input_jpeg_filename = "mona_lisa_noisy.jpg";
     out_extension = "_denoised";
     output_name(input_jpeg_filename, &output_jpeg_filename, out_extension, iters);
@@ -35,7 +36,9 @@ int main(int argc, char *argv[])
     
     if (my_rank == 0)
     {
+        printf("\nImporting image: \"%s\"\n", input_jpeg_filename);
         import_JPEG_file(input_jpeg_filename, &image_chars, &m, &n, &c);
+        printf("--> vertical pixels: %d, horizontal pixels: %d, num components: %d\n\n", m, n, c);
         allocate_image(&whole_image, m, n);
     }
 
@@ -48,22 +51,17 @@ int main(int argc, char *argv[])
     /* 2D decomposition of the m x n pixels evenly among the MPI processes */
 
     // 1D partitioning
-    if (my_rank == 0){
-        printf("%d x %d\n", m, n);
-    }
-
     my_m = m / (int)num_procs + (my_rank < m % num_procs);
     my_n = n;
     int my_prod = my_m*my_n;
     my_image_chars = malloc(my_prod * sizeof(unsigned char));
-
     allocate_image(&u, my_m, my_n);
     allocate_image(&u_bar, my_m, my_n);
 
     // /* each process asks process 0 for a partitioned region */
     // /* of image_chars and copy the values into u */
     // /*  ...  */
-    MPI_Status status;
+    
 
     if (my_rank == 0){
 
@@ -154,7 +152,9 @@ int main(int argc, char *argv[])
     if (my_rank == 0)
     {
         convert_image_to_jpeg(&whole_image, image_chars);
+        printf("Exporting as: \"%s\"\n", output_jpeg_filename);
         export_JPEG_file(output_jpeg_filename, image_chars, m, n, c, 75);
+        printf("--> complete\n\n");
         deallocate_image(&whole_image);
 
     }

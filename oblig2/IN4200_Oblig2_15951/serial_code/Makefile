@@ -7,19 +7,11 @@ OBJS = serial_main.o ../utilities/functions.o
 
 
 all: simple-jpeg $(PROJ) $(OBJS) obj-clean run
-
+ 
 
 serial_main: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@.out $(LDFLAGS)
 
-
-
-serial_main.o: serial_main.c
-	$(CC) $(CFLAGS) -c serial_main.c
-
-
-functions.o: functions.c functions.h
-	$(CC) $(CFLAGS) -c functions.c
 
 
 simple-jpeg:
@@ -31,9 +23,10 @@ run:
 
 obj-clean:
 	$(RM) *.o
+	$(RM) ../utilities/*.o
 
 exec-clean:
-	$(RM) $(PROJ)
+	$(RM) *.out
 
 autosave-clean:
 	$(RM) *~

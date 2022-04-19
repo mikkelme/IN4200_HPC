@@ -14,6 +14,13 @@ void iso_diffusion_denoising_parallel(image *u, image *u_bar, float kappa, int i
     top_neigh_row = malloc(u->n * sizeof(float));
     bottom_neigh_row = malloc(u->n * sizeof(float));
     size_t i;
+    double start, end;
+    
+    if (my_rank == 0)
+    {
+        printf("Processing image (iters = %d)\n", iters);
+        start = MPI_Wtime();
+    }
 
     for (size_t iter = 0; iter < iters; iter++)
     {
@@ -146,7 +153,10 @@ void iso_diffusion_denoising_parallel(image *u, image *u_bar, float kappa, int i
         }
     }
 
-
+    if (my_rank == 0){
+        end = MPI_Wtime();
+        printf("--> complete (time used = %g s)\n\n", (double)(end - start));
+    }
 }
 
 
