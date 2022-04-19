@@ -1,5 +1,10 @@
 #include "../utilities/functions_parallel.h"
 
+void partion_1D(int m, int n, int *my_m, int *my_n, int *my_prod, int my_rank, int num_procs){
+    *my_m = m / (int)num_procs + (my_rank < m % num_procs);
+    *my_n = n;
+    *my_prod = *my_m * *my_n;
+}
 
 void iso_diffusion_denoising_parallel(image *u, image *u_bar, float kappa, int iters){
     int my_rank, num_procs;
@@ -18,7 +23,7 @@ void iso_diffusion_denoising_parallel(image *u, image *u_bar, float kappa, int i
     
     if (my_rank == 0)
     {
-        printf("Processing image (iters = %d)\n", iters);
+        printf("Processing image | #threads = %d, iters = %d\n", num_procs, iters);
         start = MPI_Wtime();
     }
 

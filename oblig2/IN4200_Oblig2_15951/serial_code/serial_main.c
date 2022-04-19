@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_filename */
     // temporary hardcoded inputs
     kappa = 0.2;
-    iters = 10000;
+    iters = 1000;
     input_jpeg_filename = "mona_lisa_noisy.jpg";
     out_extension = "_denoised";
     output_name(input_jpeg_filename, &output_jpeg_filename, out_extension, iters);

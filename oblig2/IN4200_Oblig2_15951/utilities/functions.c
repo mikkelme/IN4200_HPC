@@ -46,7 +46,8 @@ void iso_diffusion_denoising(image *u, image *u_bar, float kappa, int iters)
     time_t start, end;
     image *tmp;
 
-    printf("Processing image (iters = %d)\n", iters);
+    printf("Processing image | iters = %d\n", iters);
+
     start = clock();
 
     for (size_t iter = 0; iter < iters; iter++)
