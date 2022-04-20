@@ -10,8 +10,7 @@
 
 int main(int argc, char *argv[])
 {
-    int m, n, c, iters;
-    int my_m, my_n, my_prod, my_rank, num_procs;
+    int m, n, c, iters, my_m, my_n, my_prod, my_rank, num_procs;
     float kappa;
     image u, u_bar, whole_image;
     unsigned char *image_chars, *my_image_chars;
@@ -22,19 +21,19 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     MPI_Status status;
 
-    /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_file
-    name */
-
-    // temporary hardcoded inputs
-    kappa = 0.2 ;
-    iters = 100;
-    input_jpeg_filename = "mona_lisa_noisy.jpg";
+    // Read input variables from command line
+    if (argc < 4)
+    {
+        printf("Please provide arguments: kappa, iters, input_jpeg_filenmae in the command line.\n");
+        exit(1);
+    }
+    kappa = atof(argv[1]);
+    iters = atoi(argv[2]);
+    input_jpeg_filename = argv[3];
     out_extension = "_denoised";
-    
+    output_name(input_jpeg_filename, &output_jpeg_filename, out_extension, iters);
 
-
-    
-    // Import image and allocate whole image
+    // Import image and allocate whole image as 2D array
     if (my_rank == 0)
     {
         printf("\nImporting image: \"%s\"\n", input_jpeg_filename);
@@ -43,104 +42,34 @@ int main(int argc, char *argv[])
         allocate_image(&whole_image, m, n);
     }
 
-    // Broadcast m, n from 0 to all the other nodes
+    // Broadcast image dimensions m x n from thread 0 to other nodes
     MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    /*  2D decomposition of the m x n pixels evenly among the MPI processes
-        using 1D Partitioning  */
 
-    
+    /*  2D decomposition of the m x n pixels evenly among the MPI processes
+        using 1D Partitioning  */    
     partion_1D(m, n, &my_m, &my_n, &my_prod, my_rank, num_procs);
     my_image_chars = malloc(my_prod * sizeof(unsigned char));
     allocate_image(&u, my_m, my_n);
     allocate_image(&u_bar, my_m, my_n);
 
     
-    /* Distribute partioned regions of image chars 
+
+    /* Distribute partioned regions of image chars
        from thread 0 to other threads */
-    if (my_rank == 0){
+    distribute_regions(m, n, image_chars, my_image_chars,  my_m,  my_n,  my_prod,  my_rank, num_procs);
 
-
-        // Copy region for thread 0
-        for (size_t i = 0; i < my_prod; i++){
-            my_image_chars[i] = image_chars[i];
-        }
-        
-
-        // Send regions to other threads
-        int start_index = my_m*my_n;
-        for (size_t i = 1; i < num_procs; i++)
-        {
-            // m, n, prod for thread i
-            int tmp_m, tmp_n, tmp_prod;
-            partion_1D(m, n, &tmp_m, &tmp_n, &tmp_prod, i, num_procs);
-
-            
-
-            MPI_Send(&image_chars[start_index],
-                        tmp_prod,
-                        MPI_UNSIGNED_CHAR, i, 0,
-                        MPI_COMM_WORLD);
-
-
-            start_index += tmp_prod;
-                
-        }
-       
-
-    }
-    else {
-        MPI_Recv(my_image_chars, my_prod, MPI_UNSIGNED_CHAR, 0, 0,
-                 MPI_COMM_WORLD, &status);
-        // printf("Recieved from thread %d\n", my_rank);
-        // printf("%d\n", my_image_chars[0]);
-    }
-
-
-    // convert jpg to image and run denoising algorithm
+    
+    // Convert jpg to image and run denoising algorithm
     convert_jpeg_to_image(my_image_chars, &u);
-    iso_diffusion_denoising_parallel(&u, &u_bar, kappa, iters);
+    iso_diffusion_denoising_parallel(&u, &u_bar, kappa, iters, my_rank, num_procs);
 
-
-
-    /* Gather partioned regions of updated image chars 
+    /* Gather partioned regions of processed image chars 
        into struct whole image from all threads to thread 0 */
-    if (my_rank == 0)
-    {
+    gather_regions( m,  n, &whole_image, &u_bar,  my_m,  my_n,  my_prod,  my_rank, num_procs);
 
-        // Region from thread 0 itself
-        for (size_t i = 0; i < my_m; i++){
-            for (size_t j = 0; j < my_n; j++){
-                whole_image.image_data[i][j] = u_bar.image_data[i][j];
-            }
-        }
-        
-
-        // Gather from remaining regions
-        int start_row = my_m;
-        for (size_t i = 1; i < num_procs; i++)
-        {
-            // m, n, prod for thread i
-            int tmp_m = m / (int)num_procs + (i < m % num_procs);
-            int tmp_n = n;
-            int tmp_prod = tmp_m * tmp_n;
-
-            MPI_Recv(&whole_image.image_data[start_row][0],
-                     tmp_prod,
-                     MPI_FLOAT, i, 0,
-                     MPI_COMM_WORLD, &status);
-            start_row += tmp_m;
-        }
-    }
-    else
-    {
-        // Send region from threads to thread 0
-        MPI_Send(&u_bar.image_data[0][0], my_prod, MPI_FLOAT, 0, 0,
-                 MPI_COMM_WORLD);
-    }
-
-    // Convert whole image and export
+    // Convert whole image to jpg and export
     if (my_rank == 0)
     {
         convert_image_to_jpeg(&whole_image, image_chars);
@@ -149,12 +78,15 @@ int main(int argc, char *argv[])
         export_JPEG_file(output_jpeg_filename, image_chars, m, n, c, 75);
         printf("--> complete\n\n");
         deallocate_image(&whole_image);
+        free(image_chars);
 
     }
     
     deallocate_image(&u);
     deallocate_image(&u_bar);
+    free(my_image_chars);
     MPI_Finalize();
+
 
     return 0;
 }

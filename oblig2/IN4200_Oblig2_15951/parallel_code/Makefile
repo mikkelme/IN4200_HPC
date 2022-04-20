@@ -6,7 +6,7 @@ PROJ = parallel_main
 OBJS = parallel_main.o ../utilities/functions.o ../utilities/functions_parallel.o
 
 
-all: simple-jpeg $(PROJ) $(OBJS) obj-clean run
+all: simple-jpeg $(PROJ) $(OBJS)
 
 
 parallel_main: $(OBJS)
@@ -17,9 +17,6 @@ parallel_main: $(OBJS)
 simple-jpeg:
 	$(MAKE) -C ../simple-jpeg
 
-
-run:
-	mpirun -np 4 ./parallel_main.out
 
 obj-clean:
 	$(RM) *.o

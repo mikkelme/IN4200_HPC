@@ -6,7 +6,6 @@
 #include <malloc.h>
 #endif
 
-// #include "functions.h"
 #include "../utilities/functions.h"
 
 int main(int argc, char *argv[])
@@ -16,12 +15,16 @@ int main(int argc, char *argv[])
     image u, u_bar;
     unsigned char *image_chars;
     char *input_jpeg_filename, *output_jpeg_filename, *out_extension;
-   
-    /* read from command line: kappa, iters, input_jpeg_filename, output_jpeg_filename */
-    // temporary hardcoded inputs
-    kappa = 0.2;
-    iters = 1000;
-    input_jpeg_filename = "mona_lisa_noisy.jpg";
+
+    // Read input variables from command line
+    if (argc < 4)
+    {
+        printf("Please provide arguments: kappa, iters, input_jpeg_filenmae in the command line.\n");
+        exit(1);
+    }
+    kappa = atof(argv[1]);
+    iters = atoi(argv[2]);
+    input_jpeg_filename = argv[3];
     out_extension = "_denoised";
     output_name(input_jpeg_filename, &output_jpeg_filename, out_extension, iters);
 
@@ -36,14 +39,14 @@ int main(int argc, char *argv[])
     // Run denoising algorithm
     iso_diffusion_denoising (&u, &u_bar, kappa, iters);
 
-    // Convert denoised image back to jpg
+    // Convert denoised image back to jpg and export
     convert_image_to_jpeg(&u_bar, image_chars);
-
     printf("Exporting as: \"%s\"\n", output_jpeg_filename);
     export_JPEG_file(output_jpeg_filename, image_chars, m, n, c, 75);
     printf("--> complete\n\n");
     deallocate_image (&u);
     deallocate_image (&u_bar);
+    free(image_chars);
 
     return 0;
 }

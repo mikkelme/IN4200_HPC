@@ -6,7 +6,7 @@ PROJ = serial_main
 OBJS = serial_main.o ../utilities/functions.o
 
 
-all: simple-jpeg $(PROJ) $(OBJS) obj-clean run
+all: simple-jpeg $(PROJ) $(OBJS)
  
 
 serial_main: $(OBJS)
@@ -19,7 +19,7 @@ simple-jpeg:
 
 
 run:
-	./serial_main.out
+	./serial_main.out 0.2 10 mona_lisa_noisy.jpg
 
 obj-clean:
 	$(RM) *.o
@@ -35,4 +35,4 @@ clean:
 	$(MAKE) obj-clean
 	$(MAKE) exec-clean
 	$(MAKE) autosave-clean
-	$(MAKE) -C ../../one_folder/simple-jpeg clean
+	$(MAKE) -C ../simple-jpeg clean
