@@ -1,7 +1,7 @@
 
 all: serial parallel
 
-quick_run: serial parallel
+quick_run: serial serial_run
 
 
 serial: 

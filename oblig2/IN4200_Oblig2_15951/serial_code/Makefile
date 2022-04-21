@@ -18,8 +18,6 @@ simple-jpeg:
 	$(MAKE) -C ../simple-jpeg
 
 
-run:
-	./serial_main.out 0.2 10 mona_lisa_noisy.jpg
 
 obj-clean:
 	$(RM) *.o

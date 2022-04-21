@@ -1,11 +1,9 @@
-
-
 # IN4200 - Mandatory 2
 
-This repository contains the work for the second mandatory of IN4200 spring 2022. The goal is to run a denoising algorithm on a noisy grey scale image. The details of the algorithm and the project in general is outlinted ```in3200_in4200_oblig2_v22.pdf```. For a quick run do ```make quick_run``` which compiles and run the serial code with default settings.
+This repository contains the work for the second mandatory of IN4200 spring 2022. The aim is to run a denoising algorithm on a noisy grey scale image. The details of the algorithm and the project in general is outlinted ```in3200_in4200_oblig2_v22.pdf```. For a quick run do ```make quick_run``` which compiles and run the serial code with default settings.
 
 ## Compiling
-To compile the code you can use the makefile in the parentfolder with following options
+To compile the code you can use the makefile in the parent folder with the following options.
 
 |  Makefile calls | Description  |
 |---|---|
@@ -29,7 +27,7 @@ In order to run the code with different input variables use the command on the f
  
 
 ## Default settings
-The default run settings is a follows
+The default run settings is a follows.
 
 | Parameters| Description | Default settings|
 |:---:|---|:---:|
