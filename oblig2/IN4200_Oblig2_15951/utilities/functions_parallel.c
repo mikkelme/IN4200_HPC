@@ -91,11 +91,11 @@ void iso_diffusion_denoising_parallel(image *u, image *u_bar, float kappa, int i
     }
 
     // Copy columns from u to u_bar
-    // for (size_t i = 0; i < u->m; i++)
-    // {
-    //     u_bar->image_data[i][0] = u->image_data[i][0];               // Left column
-    //     u_bar->image_data[i][u->n - 1] = u->image_data[i][u->n - 1]; // Left column
-    // }
+    for (size_t i = 0; i < u->m; i++)
+    {
+        u_bar->image_data[i][0] = u->image_data[i][0];               // Left column
+        u_bar->image_data[i][u->n - 1] = u->image_data[i][u->n - 1]; // Left column
+    }
 
 
     for (size_t iter = 0; iter < iters; iter++){
