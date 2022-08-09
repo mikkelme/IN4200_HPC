@@ -1,4 +1,4 @@
-# IN4200 - HPC
+# IN4200 - High-Performance Computing (HPC) and Numerical Projects
 Coursework in [IN4200 - High-Performance Computing and Numerical Projects](https://www.uio.no/studier/emner/matnat/ifi/IN4200/index-eng.html)
 
 ## Project 1
